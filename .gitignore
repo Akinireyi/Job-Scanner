@@ -46,5 +46,8 @@ Thumbs.db
 
 # Scanner output (we may dump JSON or logs locally — don't ship them)
 listings_cache.json
+scored.json
+emailed.json
+delivered.json
 *.log
 output/

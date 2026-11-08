@@ -1,0 +1,21 @@
+{
+  "year": "freshman",
+  "graduation": "May 2029",
+  "role_focus": [
+    "First-year / sophomore programs (Google STEP, Microsoft Explore, Meta University, etc.)",
+    "General SWE (backend, frontend, full-stack, mobile)",
+    "Applied ML / ML Engineer (production ML, not pure research)",
+    "Product management / business-tech (APM, TPM, Business Analyst)"
+  ],
+  "location_preferences": [
+    "Anywhere in the US, including Remote-US",
+    "Major tech hubs preferred: SF Bay Area, NYC, Seattle, Boston, LA"
+  ],
+  "company_preferences": [
+    "Big Tech (Google, Meta, Amazon, Microsoft, Apple, Nvidia)",
+    "AI frontier labs (Anthropic, OpenAI, DeepMind, Mistral, xAI, Cohere)",
+    "Social impact / nonprofits / mission-driven tech",
+    "Early-stage startups (seed through Series B)"
+  ],
+  "background_notes": "CS freshman at Indiana University (AI concentration + business minor), graduating May 2029. Languages: Python (incl. NumPy), JavaScript, HTML, CSS; comfortable with Git/GitHub. Projects: AI chatbot for Bellevue LifeSpring nonprofit (Claude API backend on Azure Functions, JavaScript frontend); this AI job scanner; personal portfolio at inikaiyer.com. Leadership: co-chaired Bellevue LifeSpring Youth Council for 2 years (event planning, leading a team); also lifeguard and swim instructor. BOOST priority: Microsoft, first-year programs, and anything explicitly open to freshmen."
+}
