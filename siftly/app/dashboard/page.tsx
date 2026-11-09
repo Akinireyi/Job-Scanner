@@ -2,6 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+// Dashboard reads per-user session cookies — can't be instant-rendered.
+export const instant = false;
+
 export default async function Dashboard() {
   const supabase = await createClient();
   const {

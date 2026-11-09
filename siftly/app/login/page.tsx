@@ -1,6 +1,9 @@
 import Link from "next/link";
 import AuthForm from "@/components/auth-form";
 
+// Reads ?mode=... from the URL — not instant-renderable.
+export const instant = false;
+
 export default async function LoginPage({
   searchParams,
 }: PageProps<"/login">) {
