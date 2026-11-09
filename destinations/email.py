@@ -49,7 +49,7 @@ def _format_location(locations: list[str]) -> str:
 
 
 def _build_html(matches: list[dict]) -> str:
-    today = datetime.now().strftime("%A, %B %d")
+    today = datetime.now().strftime("%A, %B %d")  # email keeps long date
     rows = []
     for m in matches:
         rows.append(f"""

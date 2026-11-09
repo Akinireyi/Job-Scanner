@@ -6,7 +6,8 @@
 *.key
 secrets/
 credentials.json
-service-account.json
+service-account*.json
+*-service-account*.json
 
 # Python
 __pycache__/

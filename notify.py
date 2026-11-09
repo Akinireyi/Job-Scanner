@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import sys
 
-from destinations import email
+from destinations import email, sheets
 from matches import collect_new_matches, mark_delivered
 
 # --- Tuning knobs --------------------------------------------------------
@@ -24,8 +24,8 @@ MAX_PER_RUN = 10       # cap per notification so inboxes stay sane
 SKIP_IF_EMPTY = True   # no delivery at all when nothing new crossed the bar
 
 # --- Destinations --------------------------------------------------------
-# To add Google Sheets / web dashboard / Slack later, append their modules here.
-DESTINATIONS = [email]
+# To add a web dashboard / Slack / Discord later, append their modules here.
+DESTINATIONS = [email, sheets]
 
 
 def main() -> int:

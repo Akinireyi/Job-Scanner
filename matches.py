@@ -44,16 +44,20 @@ def save_delivered_ids(ids: Iterable[str]) -> None:
 def collect_new_matches(
     min_score: int = 8,
     max_count: Optional[int] = None,
+    ignore_delivered: bool = False,
 ) -> list[dict]:
     """Find listings with score >= min_score that have not been delivered yet.
 
     Returns a list of plain dicts (not scanner-internal objects) so destinations
     can serialize them freely to JSON, HTML, Sheet rows, dashboard state, etc.
+
+    ignore_delivered=True includes matches already marked delivered — useful
+    for backfilling a new destination without touching the weekly dedup state.
     """
     listings = fetch_listings()
     pre_filtered = pre_filter_listings(listings)
     scored = load_score_cache()
-    delivered = load_delivered_ids()
+    delivered = set() if ignore_delivered else load_delivered_ids()
 
     matches: list[dict] = []
     for listing, category in pre_filtered:
