@@ -6,6 +6,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["personal/dashboard.py"],
       "port": 5000
+    },
+    {
+      "name": "siftly",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "siftly"],
+      "port": 3000
     }
   ]
 }
