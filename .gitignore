@@ -50,5 +50,6 @@ listings_cache.json
 scored.json
 emailed.json
 delivered.json
+applied.json
 *.log
 output/
