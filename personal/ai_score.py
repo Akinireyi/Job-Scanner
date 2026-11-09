@@ -13,10 +13,10 @@ from pathlib import Path
 from typing import Any
 
 import anthropic
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 
 HERE = Path(__file__).parent
-load_dotenv(HERE / ".env")
+load_dotenv(find_dotenv())  # finds .env by walking up from here
 
 MODEL = "claude-haiku-5-5"
 PROFILE_PATH = HERE / "profile.json"

@@ -22,11 +22,11 @@ from datetime import datetime
 from pathlib import Path
 
 import gspread
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from google.oauth2.service_account import Credentials
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-load_dotenv(PROJECT_ROOT / ".env")
+load_dotenv(find_dotenv())  # walks up to find .env regardless of folder depth
 
 HEADERS = ["Found", "Score", "Category", "Company", "Role", "Locations", "URL", "Why"]
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]

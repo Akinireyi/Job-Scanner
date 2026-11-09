@@ -18,10 +18,10 @@ from datetime import datetime
 from email.message import EmailMessage
 from pathlib import Path
 
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 
-# Load .env from the project root (one level above this file).
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+# Walk up from here to find .env — works at any depth in the repo.
+load_dotenv(find_dotenv())
 
 
 def _config() -> dict:

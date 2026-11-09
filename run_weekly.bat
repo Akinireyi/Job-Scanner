@@ -2,7 +2,7 @@
 REM Weekly runner: re-scan listings, then notify on new 8+/10 matches.
 REM Scheduled via Windows Task Scheduler. Output goes to weekly.log.
 
-cd /d "C:\Users\inika\OneDrive\AI Job Scanner"
+cd /d "C:\Users\inika\OneDrive\AI Job Scanner\personal"
 echo ============================================= >> weekly.log
 echo Run started %date% %time% >> weekly.log
 python scanner.py >> weekly.log 2>&1

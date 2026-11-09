@@ -22,10 +22,30 @@ import requests
 HERE = Path(__file__).parent
 SCORE_CACHE_PATH = HERE / "scored.json"
 
-LISTINGS_URL = (
-    "https://raw.githubusercontent.com/SimplifyJobs/Summer2027-Internships/"
-    "dev/.github/scripts/listings.json"
-)
+# Resolved lazily by _latest_simplify_url() so this keeps working year after
+# year as SimplifyJobs ships Summer2028-Internships, Summer2029-Internships, etc.
+LISTINGS_URL: Optional[str] = None
+
+
+def _latest_simplify_url() -> str:
+    """Find the newest SimplifyJobs Summer<YEAR>-Internships repo and return
+    the raw URL to its listings.json. Tries the next two years first (handles
+    repos that launch before the calendar year rolls over), then walks back."""
+    import datetime
+    current = datetime.date.today().year
+    template = (
+        "https://raw.githubusercontent.com/SimplifyJobs/Summer{year}-Internships/"
+        "dev/.github/scripts/listings.json"
+    )
+    for year in range(current + 2, current - 2, -1):
+        url = template.format(year=year)
+        try:
+            response = requests.head(url, timeout=10, allow_redirects=True)
+            if response.status_code == 200:
+                return url
+        except requests.RequestException:
+            continue
+    raise RuntimeError("No SimplifyJobs Summer<year>-Internships repo reachable")
 
 MIN_SCORE_TO_SHOW = 7  # after AI scoring, only print matches this strong or stronger
 
@@ -133,8 +153,17 @@ NON_US_MARKERS = (
 
 # ------------------------------------------------------------------- fetch ----
 
-def fetch_listings(url: str = LISTINGS_URL) -> list[dict]:
-    """Download listings.json from GitHub and parse it."""
+def fetch_listings(url: Optional[str] = None) -> list[dict]:
+    """Download listings.json from GitHub and parse it.
+
+    url defaults to the newest SimplifyJobs Summer<year> repo, resolved
+    at call time so the scanner needs no code change between seasons.
+    """
+    global LISTINGS_URL
+    if url is None:
+        if LISTINGS_URL is None:
+            LISTINGS_URL = _latest_simplify_url()
+        url = LISTINGS_URL
     response = requests.get(url, timeout=30)
     response.raise_for_status()
     return response.json()
@@ -260,9 +289,10 @@ def print_listing(listing: dict, category: str, score_info: Optional[dict] = Non
 # ---------------------------------------------------------------------- main --
 
 def main() -> int:
-    print(f"Fetching listings from:\n  {LISTINGS_URL}\n")
+    print("Resolving latest SimplifyJobs internships repo ...")
     try:
         listings = fetch_listings()
+        print(f"  Using {LISTINGS_URL}\n")
     except requests.RequestException as error:
         print(f"Failed to fetch listings: {error}", file=sys.stderr)
         return 1
