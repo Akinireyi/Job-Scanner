@@ -6,9 +6,16 @@ import { saveProfile, type ProfileFormState } from "@/app/onboarding/actions";
 import schoolsData from "@/data/us-schools.json";
 import { Combobox, MultiCombobox } from "@/components/combobox";
 import { SCHOOL_ALIASES } from "@/data/school-aliases";
+import { SUPPLEMENTARY_US_SCHOOLS } from "@/data/supplementary-schools";
 import { US_LOCATIONS } from "@/data/locations";
 
-const US_SCHOOLS = (schoolsData as { schools: string[] }).schools;
+// Merge Hipolabs dataset + supplementary (missing major schools), dedupe.
+const US_SCHOOLS = Array.from(
+  new Set([
+    ...(schoolsData as { schools: string[] }).schools,
+    ...SUPPLEMENTARY_US_SCHOOLS,
+  ])
+).sort();
 
 const GRAD_YEAR_SUGGESTIONS = (() => {
   const base = new Date().getFullYear();
@@ -79,8 +86,7 @@ export default function OnboardingForm({
             options={US_SCHOOLS}
             aliases={SCHOOL_ALIASES}
             initial={initial.school ?? ""}
-            placeholder="Indiana University (or TAMU, UCB, UW…)"
-            hint="Accredited US schools — try abbreviations too (TAMU → Texas A&M, UCB → Berkeley, UW shows all 3 UW campuses)."
+            placeholder="Indiana University"
           />
           <SelectField
             label="Enrollment"
@@ -100,7 +106,6 @@ export default function OnboardingForm({
             placeholder="2029"
             defaultValue={initial.graduation_year?.toString() ?? ""}
             listId="grad-year-list"
-            hint="Any year — Siftly figures out your class from this and auto-updates each school year."
           />
         </div>
         <GradYearDatalist />
@@ -591,10 +596,10 @@ function LocationsBlock({
       <MultiCombobox
         name="preferred_locations"
         options={US_LOCATIONS}
-        placeholder="Start typing a city, state, or Remote…"
+        placeholder="Start typing a city, country, or Remote…"
         initial={initialLocations}
         disabled={anyPref}
-        hint="Pick as many as you want. Not listed? Type it and press Enter."
+        hint="US and international locations. Pick as many as you want — or type any place not listed and press Enter."
       />
     </div>
   );

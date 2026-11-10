@@ -1,13 +1,16 @@
-// Common US work locations for Siftly's location combobox.
+// Common work locations for Siftly's location combobox.
 // Not exhaustive — users can type anything and press Enter.
+// Starts with Remote variants, then US, then international.
 
 export const US_LOCATIONS: string[] = [
   // Remote
-  "Remote (US)",
+  "Remote (US only)",
+  "Remote (Americas)",
+  "Remote (Europe)",
+  "Remote (APAC)",
   "Remote (anywhere)",
-  "Hybrid",
 
-  // Bay Area
+  // US — Bay Area
   "SF Bay Area",
   "San Francisco, CA",
   "Oakland, CA",
@@ -19,46 +22,46 @@ export const US_LOCATIONS: string[] = [
   "Cupertino, CA",
   "Berkeley, CA",
 
-  // LA / So-Cal
+  // US — LA / So-Cal
   "Los Angeles, CA",
   "Santa Monica, CA",
   "Pasadena, CA",
   "Irvine, CA",
   "San Diego, CA",
 
-  // NY metro
+  // US — NY metro
   "New York, NY",
   "Brooklyn, NY",
   "NYC Metro",
   "Jersey City, NJ",
   "Newark, NJ",
 
-  // Seattle area
+  // US — Seattle area
   "Seattle, WA",
   "Bellevue, WA",
   "Redmond, WA",
   "Tacoma, WA",
   "Bothell, WA",
 
-  // Boston
+  // US — Boston
   "Boston, MA",
   "Cambridge, MA",
 
-  // DC / NoVA
+  // US — DC / NoVA
   "Washington, DC",
   "Arlington, VA",
   "Reston, VA",
   "Alexandria, VA",
   "Bethesda, MD",
 
-  // Texas
+  // US — Texas
   "Austin, TX",
   "Dallas, TX",
   "Houston, TX",
   "Fort Worth, TX",
   "San Antonio, TX",
 
-  // Midwest
+  // US — Midwest
   "Chicago, IL",
   "Minneapolis, MN",
   "St. Paul, MN",
@@ -74,7 +77,7 @@ export const US_LOCATIONS: string[] = [
   "Kansas City, MO",
   "St. Louis, MO",
 
-  // Southeast
+  // US — Southeast
   "Atlanta, GA",
   "Charlotte, NC",
   "Raleigh, NC",
@@ -88,7 +91,7 @@ export const US_LOCATIONS: string[] = [
   "Jacksonville, FL",
   "New Orleans, LA",
 
-  // Mountain / Southwest
+  // US — Mountain / Southwest
   "Denver, CO",
   "Boulder, CO",
   "Salt Lake City, UT",
@@ -100,33 +103,33 @@ export const US_LOCATIONS: string[] = [
   "Reno, NV",
   "Boise, ID",
 
-  // Mid-Atlantic
+  // US — Mid-Atlantic
   "Philadelphia, PA",
   "Pittsburgh, PA",
   "Baltimore, MD",
   "Richmond, VA",
 
-  // New England
+  // US — New England
   "Providence, RI",
   "Hartford, CT",
   "New Haven, CT",
   "Portland, ME",
   "Burlington, VT",
 
-  // Pacific NW
+  // US — Pacific NW
   "Portland, OR",
 
-  // Hawaii / Alaska
+  // US — Hawaii / Alaska
   "Honolulu, HI",
   "Anchorage, AK",
 
-  // Upstate NY
+  // US — Upstate NY
   "Buffalo, NY",
   "Rochester, NY",
   "Albany, NY",
   "Syracuse, NY",
 
-  // Regions
+  // US — Regions
   "Bay Area",
   "Tri-State Area (NY/NJ/CT)",
   "New England",
@@ -135,7 +138,7 @@ export const US_LOCATIONS: string[] = [
   "Southeast",
   "Mid-Atlantic",
 
-  // States (for broader searches)
+  // US — States
   "California",
   "New York",
   "Washington State",
@@ -152,4 +155,89 @@ export const US_LOCATIONS: string[] = [
   "Indiana",
   "Ohio",
   "Minnesota",
+
+  // Canada
+  "Toronto, Canada",
+  "Vancouver, Canada",
+  "Montreal, Canada",
+  "Ottawa, Canada",
+  "Calgary, Canada",
+  "Waterloo, Canada",
+
+  // UK + Ireland
+  "London, UK",
+  "Manchester, UK",
+  "Edinburgh, UK",
+  "Dublin, Ireland",
+
+  // Europe
+  "Paris, France",
+  "Berlin, Germany",
+  "Munich, Germany",
+  "Amsterdam, Netherlands",
+  "Zurich, Switzerland",
+  "Geneva, Switzerland",
+  "Stockholm, Sweden",
+  "Copenhagen, Denmark",
+  "Oslo, Norway",
+  "Helsinki, Finland",
+  "Barcelona, Spain",
+  "Madrid, Spain",
+  "Lisbon, Portugal",
+  "Milan, Italy",
+  "Rome, Italy",
+  "Warsaw, Poland",
+  "Prague, Czechia",
+  "Vienna, Austria",
+
+  // Middle East
+  "Tel Aviv, Israel",
+  "Dubai, UAE",
+  "Abu Dhabi, UAE",
+
+  // APAC
+  "Singapore",
+  "Hong Kong",
+  "Tokyo, Japan",
+  "Osaka, Japan",
+  "Seoul, South Korea",
+  "Shanghai, China",
+  "Beijing, China",
+  "Shenzhen, China",
+  "Bangalore, India",
+  "Hyderabad, India",
+  "Mumbai, India",
+  "Delhi, India",
+  "Chennai, India",
+  "Pune, India",
+  "Taipei, Taiwan",
+  "Kuala Lumpur, Malaysia",
+
+  // Oceania
+  "Sydney, Australia",
+  "Melbourne, Australia",
+  "Auckland, New Zealand",
+
+  // Latin America
+  "Mexico City, Mexico",
+  "Guadalajara, Mexico",
+  "São Paulo, Brazil",
+  "Rio de Janeiro, Brazil",
+  "Buenos Aires, Argentina",
+  "Santiago, Chile",
+  "Bogotá, Colombia",
+  "Lima, Peru",
+
+  // Africa
+  "Lagos, Nigeria",
+  "Nairobi, Kenya",
+  "Cape Town, South Africa",
+  "Johannesburg, South Africa",
+
+  // International regions
+  "Europe",
+  "EMEA",
+  "APAC",
+  "LATAM",
+  "Americas",
 ];
