@@ -18,7 +18,7 @@ export default async function OnboardingPage() {
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "display_name, school, enrollment_type, graduation_year, majors, minors, skills, interests, preferred_locations, background_notes"
+      "display_name, school, enrollment_type, graduation_year, majors, minors, concentrations, skills, interests, preferred_locations, work_style, location_any, background_notes"
     )
     .eq("user_id", user.id)
     .maybeSingle();

@@ -15,11 +15,14 @@ create table if not exists public.profiles (
   school text,
   majors text[] default '{}',
   minors text[] default '{}',
+  concentrations text[] default '{}',
   graduation_year int,
   enrollment_type text check (enrollment_type in ('undergrad','masters','newgrad','jobseeker')),
   skills text[] default '{}',
   interests text[] default '{}',
   preferred_locations text[] default '{}',
+  work_style text[] default '{}',           -- remote / hybrid / in_person
+  location_any boolean default false,       -- "no preference, match anywhere"
   background_notes text,
   resume_file_path text,
   created_at timestamptz not null default now(),
