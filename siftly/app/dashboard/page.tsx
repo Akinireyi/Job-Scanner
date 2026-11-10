@@ -108,9 +108,9 @@ export default async function Dashboard() {
             about, and your resume (if you have one). Once you&rsquo;re done,
             Siftly starts scoring new internships for you.
           </p>
-          <button className="btn btn-primary" disabled title="Coming soon">
-            Set up my profile &middot; soon
-          </button>
+          <Link href="/onboarding" className="btn btn-primary">
+            Set up my profile
+          </Link>
         </div>
       </main>
     </div>
