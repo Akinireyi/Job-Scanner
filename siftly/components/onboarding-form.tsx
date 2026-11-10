@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useActionState, useId, useState } from "react";
 import { saveProfile, type ProfileFormState } from "@/app/onboarding/actions";
 import schoolsData from "@/data/us-schools.json";
+import { Combobox, MultiCombobox } from "@/components/combobox";
+import { SCHOOL_ALIASES } from "@/data/school-aliases";
+import { US_LOCATIONS } from "@/data/locations";
 
 const US_SCHOOLS = (schoolsData as { schools: string[] }).schools;
 
@@ -31,6 +34,19 @@ export type InitialProfile = {
   background_notes?: string | null;
 };
 
+// Prevent Enter in any text input from submitting the form.
+// Chip input + combobox handle their own Enter behavior inside.
+function trapEnter(e: React.KeyboardEvent<HTMLFormElement>) {
+  const t = e.target as HTMLElement;
+  if (
+    e.key === "Enter" &&
+    t.tagName === "INPUT" &&
+    (t as HTMLInputElement).type !== "submit"
+  ) {
+    e.preventDefault();
+  }
+}
+
 export default function OnboardingForm({
   initial,
 }: {
@@ -42,7 +58,11 @@ export default function OnboardingForm({
   );
 
   return (
-    <form action={formAction} className="flex flex-col gap-12">
+    <form
+      action={formAction}
+      className="flex flex-col gap-12"
+      onKeyDown={trapEnter}
+    >
       {/* 01 — About */}
       <Section num="01" title="About you" sub="Who you are, where you are in school.">
         <ResumePlaceholder />
@@ -53,13 +73,14 @@ export default function OnboardingForm({
             defaultValue={initial.display_name ?? ""}
             placeholder="Inika"
           />
-          <Field
-            label="School"
+          <Combobox
             name="school"
-            placeholder="Indiana University"
-            defaultValue={initial.school ?? ""}
-            listId="us-schools-list"
-            hint="US universities + community colleges. Type anything if yours isn't suggested."
+            label="School"
+            options={US_SCHOOLS}
+            aliases={SCHOOL_ALIASES}
+            initial={initial.school ?? ""}
+            placeholder="Indiana University (or TAMU, UCB, UW…)"
+            hint="Accredited US schools — try abbreviations too (TAMU → Texas A&M, UCB → Berkeley, UW shows all 3 UW campuses)."
           />
           <SelectField
             label="Enrollment"
@@ -79,10 +100,9 @@ export default function OnboardingForm({
             placeholder="2029"
             defaultValue={initial.graduation_year?.toString() ?? ""}
             listId="grad-year-list"
-            hint="Any year — Siftly figures out your class from this."
+            hint="Any year — Siftly figures out your class from this and auto-updates each school year."
           />
         </div>
-        <SchoolsDatalist />
         <GradYearDatalist />
       </Section>
 
@@ -121,7 +141,7 @@ export default function OnboardingForm({
       <Section
         num="03"
         title="What you're good at and what you care about"
-        sub="Type a skill or interest, then press Enter or comma to add it as a chip."
+        sub="Type one, press Enter or comma to turn it into a chip. Mix any field — Siftly is for CS, business, design, finance, consulting, humanities, anything."
       >
         <div className="grid gap-5">
           <ChipInput
@@ -129,12 +149,14 @@ export default function OnboardingForm({
             name="skills"
             placeholder="Python"
             initial={initial.skills ?? []}
+            hint="Try things like: Python, R, Figma, financial modeling, Excel, Spanish, public speaking, Salesforce, UX research, project management, data viz, SQL, writing, Adobe suite."
           />
           <ChipInput
             label="Interests"
             name="interests"
             placeholder="AI/ML"
             initial={initial.interests ?? []}
+            hint="Try things like: AI/ML, consumer brands, healthcare, climate, fintech, product design, education, policy, media, biotech, social impact, consulting, VC, hardware."
           />
         </div>
       </Section>
@@ -212,7 +234,7 @@ function Section({
           {num}
         </p>
         <h2 className="font-display text-2xl mb-1">{title}</h2>
-        <p className="text-sm text-[color:var(--muted)] leading-relaxed max-w-xl">
+        <p className="text-sm text-[color:var(--muted)] leading-relaxed max-w-2xl">
           {sub}
         </p>
       </div>
@@ -303,16 +325,6 @@ function SelectField({
         ))}
       </select>
     </label>
-  );
-}
-
-function SchoolsDatalist() {
-  return (
-    <datalist id="us-schools-list">
-      {US_SCHOOLS.map((s) => (
-        <option key={s} value={s} />
-      ))}
-    </datalist>
   );
 }
 
@@ -417,7 +429,7 @@ function AddMoreList({
   );
 }
 
-// ---- Chip input (skills, interests, locations) ----
+// ---- Chip input (skills, interests — plain chip list, no suggestions) ----
 
 function ChipInput({
   label,
@@ -425,12 +437,14 @@ function ChipInput({
   placeholder,
   initial,
   disabled = false,
+  hint,
 }: {
   label?: string;
   name: string;
   placeholder?: string;
   initial: string[];
   disabled?: boolean;
+  hint?: string;
 }) {
   const [values, setValues] = useState<string[]>(initial);
   const [input, setInput] = useState("");
@@ -501,6 +515,7 @@ function ChipInput({
         />
       </div>
       <input type="hidden" name={name} value={values.join(", ")} />
+      {hint && <span className="text-xs text-[color:var(--muted)]">{hint}</span>}
     </div>
   );
 }
@@ -542,7 +557,6 @@ function WorkStyleChips({ initial }: { initial: string[] }) {
           </button>
         );
       })}
-      {/* Hidden inputs for form submission */}
       {Array.from(selected).map((v) => (
         <input key={v} type="hidden" name="work_style" value={v} />
       ))}
@@ -550,7 +564,7 @@ function WorkStyleChips({ initial }: { initial: string[] }) {
   );
 }
 
-// ---- Locations block with No-preference toggle ----
+// ---- Locations block with No-preference toggle + autocomplete multiselect ----
 
 function LocationsBlock({
   initialLocations,
@@ -574,11 +588,13 @@ function LocationsBlock({
         />
         <span>No preference &mdash; match anywhere in the US</span>
       </label>
-      <ChipInput
+      <MultiCombobox
         name="preferred_locations"
-        placeholder="SF Bay Area, NYC, Seattle..."
+        options={US_LOCATIONS}
+        placeholder="Start typing a city, state, or Remote…"
         initial={initialLocations}
         disabled={anyPref}
+        hint="Pick as many as you want. Not listed? Type it and press Enter."
       />
     </div>
   );
