@@ -9,13 +9,22 @@ import { SCHOOL_ALIASES } from "@/data/school-aliases";
 import { SUPPLEMENTARY_US_SCHOOLS } from "@/data/supplementary-schools";
 import { US_LOCATIONS } from "@/data/locations";
 
+// Names in the base dataset that are superseded by more specific entries
+// in SUPPLEMENTARY_US_SCHOOLS. These get filtered out so users only see
+// the specific variant.
+const SCHOOLS_TO_HIDE = new Set<string>([
+  "University of Washington", // use "University of Washington - Seattle/Tacoma/Bothell"
+]);
+
 // Merge Hipolabs dataset + supplementary (missing major schools), dedupe.
 const US_SCHOOLS = Array.from(
   new Set([
     ...(schoolsData as { schools: string[] }).schools,
     ...SUPPLEMENTARY_US_SCHOOLS,
   ])
-).sort();
+)
+  .filter((s) => !SCHOOLS_TO_HIDE.has(s))
+  .sort();
 
 const GRAD_YEAR_SUGGESTIONS = (() => {
   const base = new Date().getFullYear();

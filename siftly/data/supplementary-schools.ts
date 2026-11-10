@@ -12,11 +12,9 @@ export const SUPPLEMENTARY_US_SCHOOLS: string[] = [
   "University of Illinois at Urbana-Champaign",
   "University of Texas at Austin",
   "University of Wisconsin-Madison",
-  "University of Wisconsin Madison",
   "Ohio State University",
   "The Ohio State University",
   "Indiana University Bloomington",
-  "Indiana University-Bloomington",
   "University of Maryland",
   "University of Virginia",
   "University of Massachusetts Amherst",
@@ -24,7 +22,8 @@ export const SUPPLEMENTARY_US_SCHOOLS: string[] = [
   "University of Nebraska-Lincoln",
   "Washington University in St. Louis",
 
-  // UW split campuses
+  // UW split campuses (the plain "University of Washington" from the
+  // base dataset is filtered out so only the 3 campuses show)
   "University of Washington - Seattle",
   "University of Washington - Tacoma",
   "University of Washington - Bothell",
@@ -33,12 +32,7 @@ export const SUPPLEMENTARY_US_SCHOOLS: string[] = [
   "Stony Brook University",
   "Binghamton University",
   "Penn State University",
-  "Penn State University - University Park",
-  "University of Pennsylvania (Wharton)",
   "University of Alabama in Huntsville",
   "University of Alabama at Birmingham",
   "University of Tennessee Knoxville",
-
-  // Common alt naming
-  "Washington University in St Louis",
 ];

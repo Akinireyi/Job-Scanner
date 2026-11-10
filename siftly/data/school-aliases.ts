@@ -41,18 +41,21 @@ export const SCHOOL_ALIASES: Record<string, string[]> = {
   uiuc: ["University of Illinois at Urbana-Champaign", "University of Illinois Urbana-Champaign"],
   uic: ["University of Illinois Chicago"],
 
-  // Washington State (all three campuses)
+  // Washington State (three campuses — "University of Washington" plain is
+  // hidden from the list; users pick a campus)
   uw: [
-    "University of Washington",
     "University of Washington - Seattle",
     "University of Washington - Tacoma",
     "University of Washington - Bothell",
   ],
-  "u dub": ["University of Washington"],
+  "u dub": ["University of Washington - Seattle"],
 
   // Wisconsin
   wisc: ["University of Wisconsin-Madison"],
   "wisc madison": ["University of Wisconsin-Madison"],
+
+  // Colorado (short form, since "cu" alone was useful)
+  cu: ["University of Colorado Boulder"],
 
   // Minnesota
   umn: ["University of Minnesota", "University of Minnesota Twin Cities"],
@@ -102,7 +105,7 @@ export const SCHOOL_ALIASES: Record<string, string[]> = {
   jhu: ["Johns Hopkins University"],
 
   // Washington University in St. Louis
-  wustl: ["Washington University in St. Louis", "Washington University in St Louis"],
+  wustl: ["Washington University in St. Louis"],
   "wash u": ["Washington University in St. Louis"],
 
   // NYC
