@@ -53,7 +53,7 @@ function filterOptions(
     else if (item.acronym && item.acronym.includes(q)) rank = 1;
 
     if (rank > 0) results.push({ name: item.name, rank });
-    if (results.length >= max * 4) break; // widen before trimming
+    // Scan the whole list — an alias target can be alphabetically far down.
   }
 
   results.sort((a, b) => b.rank - a.rank || a.name.length - b.name.length);

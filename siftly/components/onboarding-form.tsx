@@ -14,6 +14,8 @@ import { US_LOCATIONS } from "@/data/locations";
 // the specific variant.
 const SCHOOLS_TO_HIDE = new Set<string>([
   "University of Washington", // use "University of Washington - Seattle/Tacoma/Bothell"
+  "Indiana University - Bloomington", // use "Indiana University Bloomington"
+  "University of Colorado at Boulder", // use "University of Colorado Boulder"
 ]);
 
 // Merge Hipolabs dataset + supplementary (missing major schools), dedupe.
