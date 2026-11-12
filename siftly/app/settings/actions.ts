@@ -70,16 +70,19 @@ export async function updateAccountInfo(
 
   const { error } = await supabase
     .from("profiles")
-    .update({
-      phone,
-      country,
-      language,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("user_id", user.id);
+    .upsert(
+      {
+        user_id: user.id,
+        phone,
+        country,
+        language,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" }
+    );
 
   if (error) return { error: `Could not save: ${error.message}` };
 
   revalidatePath("/settings");
-  return { success: "Account info saved." };
+  return { success: "Saved." };
 }

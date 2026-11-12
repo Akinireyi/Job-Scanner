@@ -90,6 +90,14 @@ export default function AuthForm({
         </p>
       )}
 
+      <label className="flex items-center gap-2 text-sm cursor-pointer select-none mt-1">
+        <input
+          type="checkbox"
+          defaultChecked
+          className="w-4 h-4 accent-[color:var(--accent)]"
+        />
+        <span>Keep me signed in</span>
+      </label>
       <button
         type="submit"
         disabled={loading}
@@ -101,9 +109,6 @@ export default function AuthForm({
             ? "Sign in"
             : "Create account"}
       </button>
-      <p className="text-xs text-center" style={{ color: "var(--muted)" }}>
-        Siftly keeps you signed in on this browser.
-      </p>
 
       <button
         type="button"

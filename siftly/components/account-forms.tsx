@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import {
   updateAccountInfo,
@@ -93,6 +94,10 @@ export function PasswordForm() {
 }
 
 // ------------------------------------------- phone / country / language ----
+// Outer component owns useActionState + success handling. Inner is keyed by
+// server values so it fully remounts when the DB changes — fixes the bug
+// where language reverted to "English" after save (previously the select was
+// uncontrolled with defaultValue and never re-read the new prop).
 
 export function AccountInfoForm({
   initialPhone,
@@ -103,31 +108,61 @@ export function AccountInfoForm({
   initialCountry?: string | null;
   initialLanguage?: string | null;
 }) {
+  const router = useRouter();
   const [state, action, isPending] = useActionState<FormState, FormData>(
     updateAccountInfo,
     null
   );
 
-  // Controlled state so save-then-reload actually reflects new values.
+  // On successful save, force a re-fetch of the server component so our
+  // `initial*` props actually update (Next.js otherwise keeps a cached
+  // version of the query result).
+  useEffect(() => {
+    if (state?.success) router.refresh();
+  }, [state, router]);
+
+  const innerKey = `${initialPhone ?? ""}|${initialCountry ?? ""}|${initialLanguage ?? ""}`;
+
+  return (
+    <AccountInfoInner
+      key={innerKey}
+      initialPhone={initialPhone}
+      initialCountry={initialCountry}
+      initialLanguage={initialLanguage}
+      action={action}
+      isPending={isPending}
+      state={state}
+    />
+  );
+}
+
+function AccountInfoInner({
+  initialPhone,
+  initialCountry,
+  initialLanguage,
+  action,
+  isPending,
+  state,
+}: {
+  initialPhone?: string | null;
+  initialCountry?: string | null;
+  initialLanguage?: string | null;
+  action: (formData: FormData) => void;
+  isPending: boolean;
+  state: FormState;
+}) {
   const [phone, setPhone] = useState(initialPhone ?? "");
   const [country, setCountry] = useState(initialCountry ?? "");
   const [language, setLanguage] = useState(initialLanguage ?? "English");
-
-  // Sync with props on remount after revalidatePath.
-  useEffect(() => setPhone(initialPhone ?? ""), [initialPhone]);
-  useEffect(() => setCountry(initialCountry ?? ""), [initialCountry]);
-  useEffect(() => setLanguage(initialLanguage ?? "English"), [initialLanguage]);
 
   function handleCountryChange(newCountry: string) {
     const newCode = DIAL_CODES[newCountry] ?? "";
     const oldCode = country ? DIAL_CODES[country] ?? "" : "";
 
     if (oldCode && phone.trim().startsWith(oldCode)) {
-      // Swap out the previous code for the new one.
       const rest = phone.trim().slice(oldCode.length);
       setPhone((newCode + rest).trim());
     } else if (!phone.trim() && newCode) {
-      // Empty phone — prefill with the new country's code.
       setPhone(newCode + " ");
     }
     setCountry(newCountry);
