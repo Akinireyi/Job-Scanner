@@ -221,11 +221,6 @@ function AccountInfoInner({
               </option>
             ))}
           </select>
-          <span className="text-xs text-[color:var(--muted)]">
-            Siftly&rsquo;s UI stays English for now. Your pick is saved so we
-            can translate later and so Claude can write match reasons in your
-            language.
-          </span>
         </label>
       </div>
 
