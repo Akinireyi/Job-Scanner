@@ -25,6 +25,9 @@ create table if not exists public.profiles (
   location_any boolean default false,       -- "no preference, match anywhere"
   background_notes text,
   resume_file_path text,
+  phone text,
+  country text,
+  language text default 'English',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
