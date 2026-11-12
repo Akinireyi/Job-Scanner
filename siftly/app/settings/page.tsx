@@ -75,7 +75,7 @@ export default async function AccountPage() {
         <AccountSection
           icon={<GlobeIcon />}
           title="Preferences"
-          sub="Phone, country, and language."
+          sub="Phone, country, and language. Siftly is English-only today — your language picks save for when we add translations later."
         >
           <AccountInfoForm
             initialPhone={profile?.phone}
