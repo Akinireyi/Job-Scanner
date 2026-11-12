@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import {
   updateAccountInfo,
   updateEmail,
@@ -9,8 +9,9 @@ import {
 } from "@/app/settings/actions";
 import { COUNTRIES } from "@/data/countries";
 import { LANGUAGES } from "@/data/languages";
+import { DIAL_CODES } from "@/data/dial-codes";
 
-// -------------------------------------------------------- change email ----
+// ---------------------------------------------------------- change email ----
 
 export function EmailForm({ currentEmail }: { currentEmail: string }) {
   const [state, action, isPending] = useActionState<FormState, FormData>(
@@ -47,7 +48,7 @@ export function EmailForm({ currentEmail }: { currentEmail: string }) {
   );
 }
 
-// ------------------------------------------------------ change password ----
+// -------------------------------------------------------- change password ---
 
 export function PasswordForm() {
   const [state, action, isPending] = useActionState<FormState, FormData>(
@@ -107,6 +108,33 @@ export function AccountInfoForm({
     null
   );
 
+  // Controlled state so save-then-reload actually reflects new values.
+  const [phone, setPhone] = useState(initialPhone ?? "");
+  const [country, setCountry] = useState(initialCountry ?? "");
+  const [language, setLanguage] = useState(initialLanguage ?? "English");
+
+  // Sync with props on remount after revalidatePath.
+  useEffect(() => setPhone(initialPhone ?? ""), [initialPhone]);
+  useEffect(() => setCountry(initialCountry ?? ""), [initialCountry]);
+  useEffect(() => setLanguage(initialLanguage ?? "English"), [initialLanguage]);
+
+  function handleCountryChange(newCountry: string) {
+    const newCode = DIAL_CODES[newCountry] ?? "";
+    const oldCode = country ? DIAL_CODES[country] ?? "" : "";
+
+    if (oldCode && phone.trim().startsWith(oldCode)) {
+      // Swap out the previous code for the new one.
+      const rest = phone.trim().slice(oldCode.length);
+      setPhone((newCode + rest).trim());
+    } else if (!phone.trim() && newCode) {
+      // Empty phone — prefill with the new country's code.
+      setPhone(newCode + " ");
+    }
+    setCountry(newCountry);
+  }
+
+  const currentCode = country ? DIAL_CODES[country] : undefined;
+
   return (
     <form action={action} className="flex flex-col gap-4">
       <label className="flex flex-col gap-1.5">
@@ -114,39 +142,42 @@ export function AccountInfoForm({
         <input
           type="tel"
           name="phone"
-          defaultValue={initialPhone ?? ""}
-          placeholder="+1 555 123 4567"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder={currentCode ? `${currentCode} 555 123 4567` : "+1 555 123 4567"}
           autoComplete="tel"
           className="input"
         />
         <span className="text-xs text-[color:var(--muted)]">
-          Optional. Not used for anything yet — saved for future 2FA and alerts.
+          {currentCode
+            ? `Prefilled with ${country}'s country code (${currentCode}). Edit the rest.`
+            : "Optional. Not used for anything yet — saved for future 2FA and alerts."}
         </span>
       </label>
 
       <div className="grid sm:grid-cols-2 gap-4">
         <label className="flex flex-col gap-1.5">
           <span className="eyebrow">Country</span>
-          <input
-            type="text"
+          <select
             name="country"
-            defaultValue={initialCountry ?? ""}
-            placeholder="United States"
-            list="siftly-countries"
-            autoComplete="country-name"
+            value={country}
+            onChange={(e) => handleCountryChange(e.target.value)}
             className="input"
-          />
-          <datalist id="siftly-countries">
+          >
+            <option value="">Pick a country</option>
             {COUNTRIES.map((c) => (
-              <option key={c} value={c} />
+              <option key={c} value={c}>
+                {c}
+              </option>
             ))}
-          </datalist>
+          </select>
         </label>
         <label className="flex flex-col gap-1.5">
           <span className="eyebrow">Language</span>
           <select
             name="language"
-            defaultValue={initialLanguage ?? "English"}
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
             className="input"
           >
             {LANGUAGES.map((l) => (

@@ -20,7 +20,9 @@ export default async function AccountPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("phone, country, language")
+    .select(
+      "display_name, school, graduation_year, enrollment_type, majors, minors, concentrations, preferred_locations, work_style, location_any, skills, interests, phone, country, language"
+    )
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -41,13 +43,16 @@ export default async function AccountPage() {
           Your account.
         </h1>
 
-        {/* --- Appearance --- */}
+        {/* --- Profile (user icon) --- */}
         <AccountSection
-          icon={<PaletteIcon />}
-          title="Appearance"
-          sub="Three options. Default is Dark. Your choice stays on this browser."
+          icon={<UserIcon />}
+          title="Profile"
+          sub="What Claude uses to score matches. Edit anytime."
         >
-          <ThemePicker />
+          <ProfileSummary profile={profile} userEmail={user.email ?? ""} />
+          <Link href="/onboarding" className="btn btn-primary mt-4 self-start">
+            Edit profile
+          </Link>
         </AccountSection>
 
         {/* --- Settings (gear) --- */}
@@ -70,7 +75,7 @@ export default async function AccountPage() {
         <AccountSection
           icon={<GlobeIcon />}
           title="Preferences"
-          sub="Phone, country, and language. All optional for now."
+          sub="Phone, country, and language."
         >
           <AccountInfoForm
             initialPhone={profile?.phone}
@@ -79,24 +84,126 @@ export default async function AccountPage() {
           />
         </AccountSection>
 
-        {/* --- Profile link + sign out --- */}
+        {/* --- Appearance (palette) --- */}
         <AccountSection
-          icon={<UserIcon />}
-          title="Profile"
-          sub="Major, school, skills, interests, location preferences. All the stuff Claude uses to score matches."
+          icon={<PaletteIcon />}
+          title="Appearance"
+          sub="Default is Dark. Your choice stays on this browser."
         >
-          <div className="flex items-center gap-3">
-            <Link href="/onboarding" className="btn btn-primary">
-              Edit profile
-            </Link>
-            <form action="/auth/signout" method="post">
-              <button type="submit" className="btn btn-ghost">
-                Sign out
-              </button>
-            </form>
-          </div>
+          <ThemePicker />
         </AccountSection>
+
+        {/* --- Sign out --- */}
+        <div className="pt-4">
+          <form action="/auth/signout" method="post">
+            <button
+              type="submit"
+              className="btn btn-ghost"
+              style={{ color: "var(--danger)" }}
+            >
+              Sign out
+            </button>
+          </form>
+        </div>
       </main>
+    </div>
+  );
+}
+
+// -------------------------------------------- profile summary component ----
+
+type ProfileRow = {
+  display_name: string | null;
+  school: string | null;
+  graduation_year: number | null;
+  enrollment_type: string | null;
+  majors: string[] | null;
+  minors: string[] | null;
+  concentrations: string[] | null;
+  preferred_locations: string[] | null;
+  work_style: string[] | null;
+  location_any: boolean | null;
+  skills: string[] | null;
+  interests: string[] | null;
+};
+
+function ProfileSummary({
+  profile,
+  userEmail,
+}: {
+  profile: ProfileRow | null;
+  userEmail: string;
+}) {
+  const displayName = profile?.display_name || userEmail.split("@")[0];
+  const enrollmentLabel = {
+    undergrad: "Undergraduate",
+    masters: "Master's",
+    newgrad: "New grad",
+    jobseeker: "Job seeker",
+  }[profile?.enrollment_type ?? ""] ?? "—";
+
+  const locations =
+    profile?.location_any
+      ? "Anywhere in the US"
+      : profile?.preferred_locations?.length
+        ? profile.preferred_locations.join(", ")
+        : "—";
+
+  const workStyle =
+    profile?.work_style?.length
+      ? profile.work_style
+          .map((w) =>
+            w === "in_person"
+              ? "In-person"
+              : w[0].toUpperCase() + w.slice(1)
+          )
+          .join(", ")
+      : "—";
+
+  return (
+    <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+      <ProfileRow label="Display name" value={displayName} />
+      <ProfileRow label="School" value={profile?.school || "—"} />
+      <ProfileRow label="Graduation year" value={profile?.graduation_year?.toString() || "—"} />
+      <ProfileRow label="Enrollment" value={enrollmentLabel} />
+      <ProfileRow label="Major(s)" value={profile?.majors?.join(", ") || "—"} />
+      <ProfileRow label="Minor(s)" value={profile?.minors?.join(", ") || "—"} />
+      <ProfileRow label="Concentration(s)" value={profile?.concentrations?.join(", ") || "—"} />
+      <ProfileRow label="Work style" value={workStyle} />
+      <ProfileRow label="Locations" value={locations} span2 />
+      <ProfileRow
+        label="Skills"
+        value={
+          profile?.skills?.length
+            ? `${profile.skills.length} tagged`
+            : "—"
+        }
+      />
+      <ProfileRow
+        label="Interests"
+        value={
+          profile?.interests?.length
+            ? `${profile.interests.length} tagged`
+            : "—"
+        }
+      />
+    </dl>
+  );
+}
+
+function ProfileRow({
+  label,
+  value,
+  span2,
+}: {
+  label: string;
+  value: string;
+  span2?: boolean;
+}) {
+  return (
+    <div className={span2 ? "sm:col-span-2" : ""}>
+      <dt className="eyebrow mb-1">{label}</dt>
+      <dd className="text-[color:var(--ink-soft)]">{value}</dd>
     </div>
   );
 }
@@ -115,7 +222,7 @@ function AccountSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-5 mb-12 pb-12 border-b border-[color:var(--rule)] last:border-0">
+    <section className="flex flex-col gap-5 mb-12 pb-12 border-b border-[color:var(--rule)]">
       <div className="flex gap-4 items-start">
         <span
           className="mt-1 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
@@ -127,14 +234,14 @@ function AccountSection({
         >
           {icon}
         </span>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h2 className="font-display text-2xl mb-1">{title}</h2>
           <p className="text-sm text-[color:var(--muted)] leading-relaxed max-w-xl">
             {sub}
           </p>
         </div>
       </div>
-      <div className="pl-12">{children}</div>
+      <div className="pl-12 flex flex-col">{children}</div>
     </section>
   );
 }

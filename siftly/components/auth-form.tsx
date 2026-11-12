@@ -101,6 +101,9 @@ export default function AuthForm({
             ? "Sign in"
             : "Create account"}
       </button>
+      <p className="text-xs text-center" style={{ color: "var(--muted)" }}>
+        Siftly keeps you signed in on this browser.
+      </p>
 
       <button
         type="button"

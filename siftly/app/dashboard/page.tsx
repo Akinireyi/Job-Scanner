@@ -68,24 +68,33 @@ export default async function Dashboard() {
           ))}
         </ul>
 
-        <p className="eyebrow mb-3 mt-2">You</p>
-        <p className="text-xs text-[color:var(--muted)] mb-2 truncate">
-          {user.email}
-        </p>
-        <Link
-          href="/settings"
-          className="btn btn-ghost text-sm w-full justify-start px-2.5"
-        >
-          Account
-        </Link>
-        <form action="/auth/signout" method="post" className="mt-auto">
-          <button
-            type="submit"
-            className="btn btn-ghost text-sm w-full justify-start px-2.5"
+        {/* Account group pinned to bottom */}
+        <div className="mt-auto flex flex-col">
+          <p className="eyebrow mb-2">You</p>
+          <p
+            className="text-xs mb-3 truncate"
+            style={{ color: "var(--muted)" }}
+            title={user.email ?? ""}
           >
-            Sign out
-          </button>
-        </form>
+            {user.email}
+          </p>
+          <Link
+            href="/settings"
+            className="text-sm py-1.5 px-2.5 rounded hover:bg-[color:var(--bg)]"
+            style={{ color: "var(--ink)" }}
+          >
+            Account
+          </Link>
+          <form action="/auth/signout" method="post">
+            <button
+              type="submit"
+              className="w-full text-left text-sm py-1.5 px-2.5 rounded hover:bg-[color:var(--bg)]"
+              style={{ color: "var(--muted)" }}
+            >
+              Sign out
+            </button>
+          </form>
+        </div>
       </aside>
 
       {/* Main */}
