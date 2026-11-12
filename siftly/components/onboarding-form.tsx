@@ -7,6 +7,7 @@ import schoolsData from "@/data/us-schools.json";
 import { Combobox, MultiCombobox } from "@/components/combobox";
 import { SCHOOL_ALIASES } from "@/data/school-aliases";
 import { SUPPLEMENTARY_US_SCHOOLS } from "@/data/supplementary-schools";
+import { INTERNATIONAL_SCHOOLS } from "@/data/international-schools";
 import { US_LOCATIONS } from "@/data/locations";
 
 // Names in the base dataset that are superseded by more specific entries
@@ -18,11 +19,12 @@ const SCHOOLS_TO_HIDE = new Set<string>([
   "University of Colorado at Boulder", // use "University of Colorado Boulder"
 ]);
 
-// Merge Hipolabs dataset + supplementary (missing major schools), dedupe.
-const US_SCHOOLS = Array.from(
+// Merge Hipolabs US dataset + supplementary US + international, dedupe.
+const ALL_SCHOOLS = Array.from(
   new Set([
     ...(schoolsData as { schools: string[] }).schools,
     ...SUPPLEMENTARY_US_SCHOOLS,
+    ...INTERNATIONAL_SCHOOLS,
   ])
 )
   .filter((s) => !SCHOOLS_TO_HIDE.has(s))
@@ -94,7 +96,7 @@ export default function OnboardingForm({
           <Combobox
             name="school"
             label="School"
-            options={US_SCHOOLS}
+            options={ALL_SCHOOLS}
             aliases={SCHOOL_ALIASES}
             initial={initial.school ?? ""}
             placeholder="Indiana University"

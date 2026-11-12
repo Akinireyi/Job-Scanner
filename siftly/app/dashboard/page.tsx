@@ -69,9 +69,21 @@ export default async function Dashboard() {
         </ul>
 
         <p className="eyebrow mb-3 mt-2">Account</p>
-        <p className="text-xs text-[color:var(--muted)] mb-3 truncate">
+        <p className="text-xs text-[color:var(--muted)] mb-2 truncate">
           {user.email}
         </p>
+        <Link
+          href="/onboarding"
+          className="btn btn-ghost text-sm w-full justify-start px-2.5"
+        >
+          Profile
+        </Link>
+        <Link
+          href="/settings"
+          className="btn btn-ghost text-sm w-full justify-start px-2.5"
+        >
+          Settings
+        </Link>
         <form action="/auth/signout" method="post" className="mt-auto">
           <button
             type="submit"
