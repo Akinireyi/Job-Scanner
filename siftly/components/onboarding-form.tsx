@@ -2,24 +2,28 @@
 
 import Link from "next/link";
 import { useActionState, useId, useState } from "react";
-import { saveProfile, type ProfileFormState } from "@/app/onboarding/actions";
+import {
+  saveProfile,
+  type ParsedResume,
+  type ProfileFormState,
+} from "@/app/onboarding/actions";
 import schoolsData from "@/data/us-schools.json";
 import { Combobox, MultiCombobox } from "@/components/combobox";
 import { SCHOOL_ALIASES } from "@/data/school-aliases";
 import { SUPPLEMENTARY_US_SCHOOLS } from "@/data/supplementary-schools";
 import { INTERNATIONAL_SCHOOLS } from "@/data/international-schools";
 import { US_LOCATIONS } from "@/data/locations";
+import ResumeUpload from "@/components/resume-upload";
 
 // Names in the base dataset that are superseded by more specific entries
 // in SUPPLEMENTARY_US_SCHOOLS. These get filtered out so users only see
 // the specific variant.
 const SCHOOLS_TO_HIDE = new Set<string>([
-  "University of Washington", // use "University of Washington - Seattle/Tacoma/Bothell"
-  "Indiana University - Bloomington", // use "Indiana University Bloomington"
-  "University of Colorado at Boulder", // use "University of Colorado Boulder"
+  "University of Washington",
+  "Indiana University - Bloomington",
+  "University of Colorado at Boulder",
 ]);
 
-// Merge Hipolabs US dataset + supplementary US + international, dedupe.
 const ALL_SCHOOLS = Array.from(
   new Set([
     ...(schoolsData as { schools: string[] }).schools,
@@ -33,7 +37,6 @@ const ALL_SCHOOLS = Array.from(
 const GRAD_YEAR_SUGGESTIONS = (() => {
   const base = new Date().getFullYear();
   const years: string[] = [];
-  // 1 year back, 6 years forward — covers freshmen through grad students.
   for (let y = base - 1; y <= base + 6; y++) years.push(String(y));
   return years;
 })();
@@ -55,7 +58,6 @@ export type InitialProfile = {
 };
 
 // Prevent Enter in any text input from submitting the form.
-// Chip input + combobox handle their own Enter behavior inside.
 function trapEnter(e: React.KeyboardEvent<HTMLFormElement>) {
   const t = e.target as HTMLElement;
   if (
@@ -77,140 +79,161 @@ export default function OnboardingForm({
     null
   );
 
+  // When the user uploads a resume, Claude's extraction gets merged on top
+  // of `initial`. We bump a counter so the keyed fields below remount with
+  // the new default values. (Mutating `initial` isn't an option since it
+  // comes from a Server Component.)
+  const [parsed, setParsed] = useState<ParsedResume | null>(null);
+  const [resetCount, setResetCount] = useState(0);
+
+  function handleParsed(p: ParsedResume) {
+    setParsed(p);
+    setResetCount((n) => n + 1);
+  }
+
+  const eff: InitialProfile = parsed ? { ...initial, ...parsed } : initial;
+  const formKey = `fields-${resetCount}`;
+
   return (
     <form
       action={formAction}
       className="flex flex-col gap-12"
       onKeyDown={trapEnter}
     >
-      {/* 01 — About */}
-      <Section num="01" title="About you" sub="Who you are, where you are in school.">
-        <ResumePlaceholder />
-        <div className="grid sm:grid-cols-2 gap-4">
-          <Field
-            label="Display name"
-            name="display_name"
-            defaultValue={initial.display_name ?? ""}
-            placeholder="Inika"
-          />
-          <Combobox
-            name="school"
-            label="School"
-            options={ALL_SCHOOLS}
-            aliases={SCHOOL_ALIASES}
-            initial={initial.school ?? ""}
-            placeholder="Indiana University"
-          />
-          <SelectField
-            label="Enrollment"
-            name="enrollment_type"
-            defaultValue={initial.enrollment_type ?? "undergrad"}
-            options={[
-              { value: "undergrad", label: "Undergraduate" },
-              { value: "masters", label: "Master's" },
-              { value: "newgrad", label: "New grad" },
-              { value: "jobseeker", label: "Job seeker" },
-            ]}
-          />
-          <Field
-            label="Graduation year"
-            name="graduation_year"
-            type="number"
-            placeholder="2029"
-            defaultValue={initial.graduation_year?.toString() ?? ""}
-            listId="grad-year-list"
-          />
-        </div>
-        <GradYearDatalist />
-      </Section>
+      <ResumeUpload onParsed={handleParsed} />
 
-      {/* 02 — Study */}
-      <Section
-        num="02"
-        title="What you study"
-        sub="Add as many majors, minors, or concentrations as you have."
-      >
-        <div className="grid sm:grid-cols-3 gap-6">
-          <AddMoreList
-            label="Major(s)"
-            name="majors"
-            addLabel="+ Add major"
-            placeholder="Computer Science"
-            initial={initial.majors ?? []}
-          />
-          <AddMoreList
-            label="Minor(s)"
-            name="minors"
-            addLabel="+ Add minor"
-            placeholder="Business"
-            initial={initial.minors ?? []}
-          />
-          <AddMoreList
-            label="Concentration(s)"
-            name="concentrations"
-            addLabel="+ Add concentration"
-            placeholder="AI"
-            initial={initial.concentrations ?? []}
-          />
-        </div>
-      </Section>
-
-      {/* 03 — Skills + Interests */}
-      <Section
-        num="03"
-        title="What you're good at and what you care about"
-        sub="Type one, press Enter or comma to turn it into a chip. Mix any field — Siftly is for CS, business, design, finance, consulting, humanities, anything."
-      >
-        <div className="grid gap-5">
-          <ChipInput
-            label="Skills"
-            name="skills"
-            placeholder="Python"
-            initial={initial.skills ?? []}
-            hint="Try things like: Python, R, Figma, financial modeling, Excel, Spanish, public speaking, Salesforce, UX research, project management, data viz, SQL, writing, Adobe suite."
-          />
-          <ChipInput
-            label="Interests"
-            name="interests"
-            placeholder="AI/ML"
-            initial={initial.interests ?? []}
-            hint="Try things like: AI/ML, consumer brands, healthcare, climate, fintech, product design, education, policy, media, biotech, social impact, consulting, VC, hardware."
-          />
-        </div>
-      </Section>
-
-      {/* 04 — Where + work style */}
-      <Section
-        num="04"
-        title="Where you'd work"
-        sub="Pick the setups you're open to and the places you'd go."
-      >
-        <div className="flex flex-col gap-5">
-          <div>
-            <p className="eyebrow mb-2">Work style</p>
-            <WorkStyleChips initial={initial.work_style ?? []} />
+      {/* Everything below remounts when a resume is parsed so fields
+          pick up the new defaults. The ResumeUpload sits above the keyed
+          region so its own state survives. */}
+      <div key={formKey} className="flex flex-col gap-12">
+        {/* 01 — About */}
+        <Section num="01" title="About you" sub="Who you are, where you are in school.">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field
+              label="Display name"
+              name="display_name"
+              defaultValue={eff.display_name ?? ""}
+              placeholder="Inika"
+            />
+            <Combobox
+              name="school"
+              label="School"
+              options={ALL_SCHOOLS}
+              aliases={SCHOOL_ALIASES}
+              initial={eff.school ?? ""}
+              placeholder="Indiana University"
+            />
+            <SelectField
+              label="Enrollment"
+              name="enrollment_type"
+              defaultValue={eff.enrollment_type ?? "undergrad"}
+              options={[
+                { value: "undergrad", label: "Undergraduate" },
+                { value: "masters", label: "Master's" },
+                { value: "newgrad", label: "New grad" },
+                { value: "jobseeker", label: "Job seeker" },
+              ]}
+            />
+            <Field
+              label="Graduation year"
+              name="graduation_year"
+              type="number"
+              placeholder="2029"
+              defaultValue={eff.graduation_year?.toString() ?? ""}
+              listId="grad-year-list"
+            />
           </div>
-          <LocationsBlock
-            initialLocations={initial.preferred_locations ?? []}
-            initialAnyPref={initial.location_any ?? false}
-          />
-        </div>
-      </Section>
+          <GradYearDatalist />
+        </Section>
 
-      {/* 05 — Notes */}
-      <Section
-        num="05"
-        title="Anything else"
-        sub="Companies to always boost or skip, projects worth highlighting, GPA if strong. Claude reads this as extra context on every score."
-      >
-        <TextareaField
-          label="Background notes"
-          name="background_notes"
-          rows={5}
-          placeholder="e.g. Boost: Anthropic, Microsoft, Khan Academy. Skip: defense contractors. Projects: AI chatbot for Bellevue LifeSpring on the Claude API."
-          defaultValue={initial.background_notes ?? ""}
-        />
-      </Section>
+        {/* 02 — Study */}
+        <Section
+          num="02"
+          title="What you study"
+          sub="Add as many majors, minors, or concentrations as you have."
+        >
+          <div className="grid sm:grid-cols-3 gap-6">
+            <AddMoreList
+              label="Major(s)"
+              name="majors"
+              addLabel="+ Add major"
+              placeholder="Computer Science"
+              initial={eff.majors ?? []}
+            />
+            <AddMoreList
+              label="Minor(s)"
+              name="minors"
+              addLabel="+ Add minor"
+              placeholder="Business"
+              initial={eff.minors ?? []}
+            />
+            <AddMoreList
+              label="Concentration(s)"
+              name="concentrations"
+              addLabel="+ Add concentration"
+              placeholder="AI"
+              initial={eff.concentrations ?? []}
+            />
+          </div>
+        </Section>
+
+        {/* 03 — Skills + Interests */}
+        <Section
+          num="03"
+          title="What you're good at and what you care about"
+          sub="Type one, press Enter or comma to turn it into a chip. Mix any field — Siftly is for CS, business, design, finance, consulting, humanities, anything."
+        >
+          <div className="grid gap-5">
+            <ChipInput
+              label="Skills"
+              name="skills"
+              placeholder="Python"
+              initial={eff.skills ?? []}
+              hint="Try things like: Python, R, Figma, financial modeling, Excel, Spanish, public speaking, Salesforce, UX research, project management, data viz, SQL, writing, Adobe suite."
+            />
+            <ChipInput
+              label="Interests"
+              name="interests"
+              placeholder="AI/ML"
+              initial={eff.interests ?? []}
+              hint="Try things like: AI/ML, consumer brands, healthcare, climate, fintech, product design, education, policy, media, biotech, social impact, consulting, VC, hardware."
+            />
+          </div>
+        </Section>
+
+        {/* 04 — Where + work style */}
+        <Section
+          num="04"
+          title="Where you'd work"
+          sub="Pick the setups you're open to and the places you'd go."
+        >
+          <div className="flex flex-col gap-5">
+            <div>
+              <p className="eyebrow mb-2">Work style</p>
+              <WorkStyleChips initial={eff.work_style ?? []} />
+            </div>
+            <LocationsBlock
+              initialLocations={eff.preferred_locations ?? []}
+              initialAnyPref={eff.location_any ?? false}
+            />
+          </div>
+        </Section>
+
+        {/* 05 — Notes */}
+        <Section
+          num="05"
+          title="Anything else"
+          sub="Companies to always boost or skip, projects worth highlighting, GPA if strong. Claude reads this as extra context on every score."
+        >
+          <TextareaField
+            label="Background notes"
+            name="background_notes"
+            rows={5}
+            placeholder="e.g. Boost: Anthropic, Microsoft, Khan Academy. Skip: defense contractors. Projects: AI chatbot for Bellevue LifeSpring on the Claude API."
+            defaultValue={eff.background_notes ?? ""}
+          />
+        </Section>
+      </div>
 
       {state?.error && (
         <p className="text-sm" style={{ color: "var(--danger)" }}>
@@ -356,26 +379,6 @@ function GradYearDatalist() {
   );
 }
 
-function ResumePlaceholder() {
-  return (
-    <div
-      className="card p-4 flex items-center justify-between gap-4"
-      style={{ background: "var(--bg-side)" }}
-    >
-      <div>
-        <p className="eyebrow mb-1">Resume</p>
-        <p className="text-sm text-[color:var(--ink-soft)]">
-          Upload a PDF and Siftly will auto-fill the rest.{" "}
-          <span className="text-[color:var(--muted)]">Coming soon.</span>
-        </p>
-      </div>
-      <button type="button" className="btn btn-outline" disabled>
-        Upload resume &middot; soon
-      </button>
-    </div>
-  );
-}
-
 // ---- + Add list (majors, minors, concentrations) ----
 
 function AddMoreList({
@@ -447,7 +450,7 @@ function AddMoreList({
   );
 }
 
-// ---- Chip input (skills, interests — plain chip list, no suggestions) ----
+// ---- Chip input (skills, interests) ----
 
 function ChipInput({
   label,
